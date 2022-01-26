@@ -26,6 +26,13 @@ type field struct {
 	name   string
 }
 
+func firstToLower(str string) string {
+	if str == "" {
+		return ""
+	}
+	return strings.ToLower(str[0:1]) + str[1:]
+}
+
 func ObjectToXmlStr(value interface{}) string {
 	val := reflect.ValueOf(value)
 	t := reflect.TypeOf(value)
@@ -35,7 +42,7 @@ func ObjectToXmlStr(value interface{}) string {
 		field: map[string]string{},
 	}
 	l.value = objectToXmlStr(val, t, &l)
-	l.name = strings.ToLower(l.name[0:1]) + l.name[1:]
+	l.name = firstToLower(l.name)
 	str, _ := tool.String("<{{.Name}}{{range $i,$v := .Map}} {{$i}}={{$v}}{{end}}>{{.Value}}</{{.Name}}>").Format(map[string]interface{}{
 		"Name":  l.name,
 		"Value": l.value,
@@ -62,7 +69,7 @@ func objectToXmlStr(v reflect.Value, t reflect.Type, parent *label) string {
 		if ok {
 			continue
 		}
-		l.name = strings.ToLower(l.name[0:1]) + l.name[1:]
+		l.name = firstToLower(l.name)
 		s, _ := tool.String(`<{{.Name}}{{.Suffix}}{{range $i,$v := .Map}} {{$i}}={{$v}}{{end}}>{{.Value}}</{{.Name}}{{.Suffix}}>`).Format(map[string]interface{}{
 			"Name":   l.name,
 			"Value":  l.value,
@@ -87,7 +94,7 @@ func handlerTag(t reflect.StructField, value reflect.Value, now *label, parent *
 		case "type":
 			switch val {
 			case "LABEL_VALUE":
-				t.Name = strings.ToLower(t.Name[0:1]) + t.Name[1:]
+				t.Name = firstToLower(t.Name)
 				parent.field[t.Name] = getValue(t.Type, value, nil)
 				return true
 			case "LABEL_CONTENT":
@@ -140,7 +147,7 @@ func analyzeTag(field reflect.StructField, v reflect.Value, parent *field, now *
 		case "type":
 			switch val {
 			case "LABEL_VALUE":
-				parent.fields[field.Name] = &v
+				parent.fields[firstToLower(field.Name)] = &v
 				return true
 			case "LABEL_CONTENT":
 				now.v = v.FieldByName("Value")
@@ -178,7 +185,7 @@ func XmlStrToObject(str string, o interface{}) {
 	}
 	getObject(str, &val, t, &parent)
 	reg, _ := tool.String("<{{.Name}}(.*?)>(.*?)</{{.Name}}>").Format(map[string]interface{}{
-		"Name": parent.name,
+		"Name": strings.ToLower(parent.name[0:1]) + parent.name[1:],
 	})
 	re := regexp.MustCompile(reg)
 	strs := re.FindStringSubmatch(str)
@@ -195,7 +202,7 @@ func getObject(str string, val *reflect.Value, t reflect.Type, parent *field) re
 			continue
 		}
 		reg, _ := tool.String("<{{.Name}}{{.Suffix}}(.*?)>(.*?)</{{.Name}}{{.Suffix}}>").Format(map[string]interface{}{
-			"Name":   arr[i].name,
+			"Name":   strings.ToLower(arr[i].name[0:1]) + arr[i].name[1:],
 			"Suffix": arr[i].suffix,
 		})
 		re := regexp.MustCompile(reg)
@@ -260,7 +267,7 @@ func setField(m map[string]*reflect.Value, str string) {
 			continue
 		}
 		nameAndValue := strings.Split(val, "=")
-		value := m[nameAndValue[0]]
+		value := m[firstToLower(nameAndValue[0])]
 		temp := field{
 			t: value.Type(),
 		}
