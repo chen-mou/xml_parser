@@ -62,6 +62,7 @@ func objectToXmlStr(v reflect.Value, t reflect.Type, parent *label) string {
 		if ok {
 			continue
 		}
+		l.name = strings.ToLower(l.name[0:1]) + l.name[1:]
 		s, _ := tool.String(`<{{.Name}}{{.Suffix}}{{range $i,$v := .Map}} {{$i}}={{$v}}{{end}}>{{.Value}}</{{.Name}}{{.Suffix}}>`).Format(map[string]interface{}{
 			"Name":   l.name,
 			"Value":  l.value,
