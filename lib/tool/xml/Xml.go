@@ -87,6 +87,7 @@ func handlerTag(t reflect.StructField, value reflect.Value, now *label, parent *
 		case "type":
 			switch val {
 			case "LABEL_VALUE":
+				t.Name = strings.ToLower(t.Name[0:1]) + t.Name[1:]
 				parent.field[t.Name] = getValue(t.Type, value, nil)
 				return true
 			case "LABEL_CONTENT":
