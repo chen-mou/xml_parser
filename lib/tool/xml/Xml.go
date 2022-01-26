@@ -35,6 +35,7 @@ func ObjectToXmlStr(value interface{}) string {
 		field: map[string]string{},
 	}
 	l.value = objectToXmlStr(val, t, &l)
+	l.name = strings.ToLower(l.name[0:1]) + l.name[1:]
 	str, _ := tool.String("<{{.Name}}{{range $i,$v := .Map}} {{$i}}={{$v}}{{end}}>{{.Value}}</{{.Name}}>").Format(map[string]interface{}{
 		"Name":  l.name,
 		"Value": l.value,
